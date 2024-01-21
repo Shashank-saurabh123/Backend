@@ -57,7 +57,7 @@ userSchema.pre("save",async function (next)
     if(!this.isModified("password")) return next();
   // else agar modify hua hai password to  password mein changes kro
 
-  this.password= bcrypt.hash(this.password,10);// now password is bcrypted
+  this.password=await bcrypt.hash(this.password,10);// now password is bcrypted
   next();
     
 })

@@ -60,7 +60,7 @@ if(!createdUser)// checking user creation step
 
 // now we wil send the response
   return res.status(201).json(
-    new ApiResponse(200,createdUser,"User registered Succesfully")
+    new ApiResponse(200,createdUser,"User registered Succesfully") // made an object of Apiresponse class
   )
 
 })
