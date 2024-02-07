@@ -21,9 +21,11 @@ const uploadOnCloudinary = async (localFilePath)=>{
         })// we can give more info abt the file which we are uploading ,eg:if it is photo is it in png or in jpg ...etc
        
         // now file has been uploaded succesfully
-        console.log("file is uploaded on cloudinary",response.url);
+        //console.log("file is uploaded on cloudinary",response.url);
         // task--> print console.log(response) and see what info you get or go to cloudinary website
-
+       
+        //file is uploaded now we will unlink the file
+        fs.unlinkSync(localFilePath)
         return response;// this will go to user
     } catch (error) {
         fs.unlinkSync(localFilePath)// it removes the locally saved temporary files as the upload operation

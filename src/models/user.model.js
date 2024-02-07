@@ -1,5 +1,5 @@
 import mongoose,{Schema} from "mongoose";
-import  Jwt from "jsonwebtoken";
+import  jwt from "jsonwebtoken";
 import  bcrypt from "bcrypt";
 
 const userSchema =new Schema(
@@ -25,11 +25,11 @@ const userSchema =new Schema(
         trim:true,
         index:true,
        },
-       avtar:{
+       avatar:{
         type:String,// from cloudnary we will get
         required:true,
        },
-       coverImages:{
+       coverImage:{
         type:String,// same cloudnary things 
        },
        watchHistory:[
@@ -73,7 +73,7 @@ userSchema.methods.isPasswordCorrect = async function (password){
 // now we are gonna to write methods to generate accestoken and refreshtoken as well
 
 userSchema.methods.generateAccessToken = function(){
-    return Jwt.sign(
+    return jwt.sign(
         {
             // we are writting payloads here 
             _id: this._id,
@@ -86,10 +86,11 @@ userSchema.methods.generateAccessToken = function(){
         {
             expiresIn: process.env.ACCESS_TOKEN_EXPIRY
         }
+        
     )
 }
 userSchema.methods.generateRefreshToken = function(){
-    return Jwt.sign(
+    return jwt.sign(
         {
             // refresh token contains less data so less apyloads here
             _id: this._id,// lhs is my payload name but rhs is coming from DB
