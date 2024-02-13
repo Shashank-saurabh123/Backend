@@ -270,8 +270,6 @@ const changeCurrentPassword=asyncHandler(async (req,res)=>{
    return res
    .status(200)
    .json(new ApiResponse(200,{},"Password changed succesfully"))
-
-
 })
 
 //getting current user
@@ -378,14 +376,97 @@ const updateUserCoverImage = asyncHandler(async(req, res) => {
     )
 })
 
+// subscription ki story
+const getUserChannelProfile=asyncHandler(async(req,res)=>{
+// if you want channel profile we go for url hence params came
+const{username}=req.params
+if(!username?.trim())
+{
+    throw new ApiError(400,"username is missing");
+}
 
+// TODO--> CONSOLE_LOG(CHANNEL)
+const channel = await User.aggregate([
+    {
+        // write your first  pipeline, matching
+        $match:{
+            username:username?.toLowerCase()// toLowercase is just for saftey purpose
+        }
+    },
+   {
+    // lookup ,now one document has created and it came to our user model from subscription model
+    $lookup:{
+        from:"subscriptions",// Subscription-->subscriptions (mongo db stores like this)
+        localField:"_id",
+        foreignField:"channel",
+        as:"subscribers"// this is kind of variable any name you can take
+    }
+   },
+   {
+    // for counting that subscribed wala
+    $lookup:{
+        from:"subscriptions",// Subscription-->subscriptions (mongo db stores like this)
+        localField:"_id",
+        foreignField:"subscriber",
+        as:"subscribedTo"
+    }
+   },
+   {
+    // now we have  to add or combine these two subscriber and subscribed field
+    $addFields:{ 
+        subscribersCount:{ // we are adding some additional info in our user
+            $size:"$subscribers"// it will give subscriber cnt
+        },
+        channelsSubscribedToCount:{
+            $size:"$subscribedTo"
+        },
+        isSubscribed: {
+            $cond: {
+                if: {$in: [req.user?._id, "$subscribers.subscriber"]},
+                then: true,
+                else: false
+            }
+        }
+    
+    }
+   },
+      {
+      $project: {
+        fullName: 1,
+        username: 1,
+        subscribersCount: 1,
+        channelsSubscribedToCount: 1,
+        isSubscribed: 1,
+        avatar: 1,
+        coverImage: 1,
+        email: 1
 
-export {registerUser,loginUser,logoutUser,refreshAccessToken
-,changeCurrentPassword,
-getCurrentUser,
-updateAccountDetails,
-updateUserAvatar,
-updateUserCoverImage,
+      }
+   },
+
+])
+ 
+
+if (!channel?.length) {
+    throw new ApiError(404, "channel does not exists")
+}
+return res
+.status(200)
+.json(
+    new ApiResponse(200, channel[0], "User channel fetched successfully")
+)
+})
+
+export {registerUser
+    ,loginUser
+    ,logoutUser
+    ,refreshAccessToken
+   ,changeCurrentPassword,
+    getCurrentUser,
+    updateAccountDetails,
+    updateUserAvatar,
+    updateUserCoverImage
+    ,getUserChannelProfile
 }
 
 
